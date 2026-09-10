@@ -39,7 +39,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(checkpoint / "adapter")
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
-    backbone = AutoModel.from_pretrained(config["model_name"], torch_dtype=dtype)
+    backbone = AutoModel.from_pretrained(config["model_name"], dtype=dtype)
     backbone = PeftModel.from_pretrained(backbone, checkpoint / "adapter")
     model = CausalW2NER(
         backbone=backbone,

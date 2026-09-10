@@ -28,6 +28,10 @@ The virtual environment is located at `.venv`.
 默认使用项目下的 `data/ocean/`，结果保存到 `outputs/qwen-ocean/`。
 PyCharm 的 Working directory 可以保持默认值。
 
+所有常用可调项均集中在 `python/train.py` 顶部的 `TRAIN_CONFIG`：数据路径、
+批大小、训练轮数、学习率、LoRA 参数、因果 W2NER 结构维度及各损失权重。
+在 PyCharm 中修改该配置区后直接运行即可；命令行参数仍可覆盖其中的默认值。
+
 也可以在终端运行：
 
 ```powershell

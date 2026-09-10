@@ -27,26 +27,91 @@ from src.model import CausalW2NER, CausalW2NERLoss
 # setting does not affect the default data/output paths.
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
+# =============================================================================
+# PyCharm tuning area
+# =============================================================================
+# Edit these defaults to run experiments directly from PyCharm.  Every item is
+# also available as a same-named command-line argument, so server commands can
+# override a value without editing the source file.
+TRAIN_CONFIG = {
+    # Data and output
+    "model_name": "Qwen/Qwen2.5-0.5B",
+    "data_dir": str(PROJECT_ROOT / "data" / "weibo"),
+    "output_dir": str(PROJECT_ROOT / "outputs" / "qwen-weibo"),
+    "max_chars": 192,
+    "max_pieces": 256,
+    "num_workers": 0,
+
+    # Optimisation
+    "seed": 123,
+    "epochs": 10,
+    "batch_size": 2,
+    "grad_accumulation": 8,
+    "learning_rate": 2e-4,
+    "weight_decay": 0.0,
+    "adam_beta1": 0.9,
+    "adam_beta2": 0.999,
+    "adam_epsilon": 1e-8,
+    "warmup_ratio": 0.1,
+    "max_grad_norm": 1.0,
+    "bf16": False,
+    "gradient_checkpointing": False,
+
+    # LoRA: injected into each Qwen attention block.
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "lora_target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
+
+    # Causal W2NER structural head
+    "lookahead": 0,
+    "state_size": 384,
+    "pair_size": 256,
+    "max_distance": 128,
+    "model_dropout": 0.15,
+
+    # Multi-task loss: NNW/THW relation + completion + anti-premature commitment.
+    "none_weight": 0.15,
+    "boundary_weight": 0.5,
+    "commitment_weight": 0.2,
+    "commitment_margin": 0.25,
+}
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-name", default="Qwen/Qwen2.5-0.5B")
-    parser.add_argument("--data-dir", default=str(PROJECT_ROOT / "data" / "weibo"))
-    parser.add_argument("--output-dir", default=str(PROJECT_ROOT / "outputs" / "qwen-weibo"))
-    parser.add_argument("--max-chars", type=int, default=192)
-    parser.add_argument("--max-pieces", type=int, default=256)
-    parser.add_argument("--batch-size", type=int, default=2)
-    parser.add_argument("--grad-accumulation", type=int, default=8)
-    parser.add_argument("--epochs", type=int, default=10)
-    parser.add_argument("--lr", type=float, default=2e-4)
-    parser.add_argument("--warmup-ratio", type=float, default=0.1)
-    parser.add_argument("--lora-r", type=int, default=16)
-    parser.add_argument("--lora-alpha", type=int, default=32)
-    parser.add_argument("--lookahead", type=int, default=0)
-    parser.add_argument("--seed", type=int, default=123)
-    parser.add_argument("--num-workers", type=int, default=0)
-    parser.add_argument("--gradient-checkpointing", action="store_true")
-    parser.add_argument("--bf16", action="store_true")
+    parser.add_argument("--model-name", default=TRAIN_CONFIG["model_name"])
+    parser.add_argument("--data-dir", default=TRAIN_CONFIG["data_dir"])
+    parser.add_argument("--output-dir", default=TRAIN_CONFIG["output_dir"])
+    parser.add_argument("--max-chars", type=int, default=TRAIN_CONFIG["max_chars"])
+    parser.add_argument("--max-pieces", type=int, default=TRAIN_CONFIG["max_pieces"])
+    parser.add_argument("--num-workers", type=int, default=TRAIN_CONFIG["num_workers"])
+    parser.add_argument("--seed", type=int, default=TRAIN_CONFIG["seed"])
+    parser.add_argument("--epochs", type=int, default=TRAIN_CONFIG["epochs"])
+    parser.add_argument("--batch-size", type=int, default=TRAIN_CONFIG["batch_size"])
+    parser.add_argument("--grad-accumulation", type=int, default=TRAIN_CONFIG["grad_accumulation"])
+    parser.add_argument("--lr", type=float, default=TRAIN_CONFIG["learning_rate"])
+    parser.add_argument("--weight-decay", type=float, default=TRAIN_CONFIG["weight_decay"])
+    parser.add_argument("--adam-beta1", type=float, default=TRAIN_CONFIG["adam_beta1"])
+    parser.add_argument("--adam-beta2", type=float, default=TRAIN_CONFIG["adam_beta2"])
+    parser.add_argument("--adam-epsilon", type=float, default=TRAIN_CONFIG["adam_epsilon"])
+    parser.add_argument("--warmup-ratio", type=float, default=TRAIN_CONFIG["warmup_ratio"])
+    parser.add_argument("--max-grad-norm", type=float, default=TRAIN_CONFIG["max_grad_norm"])
+    parser.add_argument("--lora-r", type=int, default=TRAIN_CONFIG["lora_r"])
+    parser.add_argument("--lora-alpha", type=int, default=TRAIN_CONFIG["lora_alpha"])
+    parser.add_argument("--lora-dropout", type=float, default=TRAIN_CONFIG["lora_dropout"])
+    parser.add_argument("--lora-target-modules", default=",".join(TRAIN_CONFIG["lora_target_modules"]))
+    parser.add_argument("--lookahead", type=int, default=TRAIN_CONFIG["lookahead"])
+    parser.add_argument("--state-size", type=int, default=TRAIN_CONFIG["state_size"])
+    parser.add_argument("--pair-size", type=int, default=TRAIN_CONFIG["pair_size"])
+    parser.add_argument("--max-distance", type=int, default=TRAIN_CONFIG["max_distance"])
+    parser.add_argument("--model-dropout", type=float, default=TRAIN_CONFIG["model_dropout"])
+    parser.add_argument("--none-weight", type=float, default=TRAIN_CONFIG["none_weight"])
+    parser.add_argument("--boundary-weight", type=float, default=TRAIN_CONFIG["boundary_weight"])
+    parser.add_argument("--commitment-weight", type=float, default=TRAIN_CONFIG["commitment_weight"])
+    parser.add_argument("--commitment-margin", type=float, default=TRAIN_CONFIG["commitment_margin"])
+    parser.add_argument("--gradient-checkpointing", action="store_true", default=TRAIN_CONFIG["gradient_checkpointing"])
+    parser.add_argument("--bf16", action="store_true", default=TRAIN_CONFIG["bf16"])
     return parser.parse_args()
 
 
@@ -136,7 +201,7 @@ def main():
     )
 
     model_dtype = torch.bfloat16 if args.bf16 else (torch.float16 if device.type == "cuda" else torch.float32)
-    backbone = AutoModel.from_pretrained(args.model_name, torch_dtype=model_dtype, trust_remote_code=False)
+    backbone = AutoModel.from_pretrained(args.model_name, dtype=model_dtype, trust_remote_code=False)
     backbone.config.use_cache = False
     if args.gradient_checkpointing:
         backbone.gradient_checkpointing_enable()
@@ -145,8 +210,8 @@ def main():
         task_type=TaskType.FEATURE_EXTRACTION,
         r=args.lora_r,
         lora_alpha=args.lora_alpha,
-        lora_dropout=0.05,
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+        lora_dropout=args.lora_dropout,
+        target_modules=[name.strip() for name in args.lora_target_modules.split(",") if name.strip()],
         bias="none",
     )
     backbone = get_peft_model(backbone, lora_config)
@@ -155,11 +220,27 @@ def main():
         backbone=backbone,
         hidden_size=backbone.config.hidden_size,
         num_labels=num_labels,
+        state_size=args.state_size,
+        pair_size=args.pair_size,
+        max_distance=args.max_distance,
+        dropout=args.model_dropout,
         lookahead=args.lookahead,
     ).to(device)
-    criterion = CausalW2NERLoss(num_labels).to(device)
+    criterion = CausalW2NERLoss(
+        num_labels=num_labels,
+        none_weight=args.none_weight,
+        boundary_weight=args.boundary_weight,
+        commitment_weight=args.commitment_weight,
+        margin=args.commitment_margin,
+    ).to(device)
 
-    optimizer = AdamW((parameter for parameter in model.parameters() if parameter.requires_grad), lr=args.lr)
+    optimizer = AdamW(
+        (parameter for parameter in model.parameters() if parameter.requires_grad),
+        lr=args.lr,
+        weight_decay=args.weight_decay,
+        betas=(args.adam_beta1, args.adam_beta2),
+        eps=args.adam_epsilon,
+    )
     update_steps = math.ceil(len(train_loader) / args.grad_accumulation)
     total_steps = update_steps * args.epochs
     scheduler = get_linear_schedule_with_warmup(
@@ -192,7 +273,7 @@ def main():
             scaler.scale(loss).backward()
             if step % args.grad_accumulation == 0 or step == len(train_loader):
                 scaler.unscale_(optimizer)
-                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=args.max_grad_norm)
                 scaler.step(optimizer)
                 scaler.update()
                 scheduler.step()
