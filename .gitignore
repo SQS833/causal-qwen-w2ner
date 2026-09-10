@@ -1,0 +1,37 @@
+# Python environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+
+# Training outputs and checkpoints
+outputs/
+checkpoints/
+runs/
+wandb/
+*.pt
+*.pth
+*.ckpt
+
+# Hugging Face and local model caches
+.cache/
+.cache/
+hf_cache/
+models/
+*.safetensors
+*.bin
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
